@@ -1,25 +1,18 @@
 import streamlit as st
 import random
 import time
-
-# Configuração da página
-st.set_page_config(
-    page_title="Assistente IA",
-    page_icon="🤖",
-    layout="centered"
-)
+import re
 
 class Chatbot:
     def __init__(self):
         self.setup_ui()
         self.initialize_state()
         self.respostas = {
-            "oi": ["Olá! Como posso ajudar?", "Oi! Em que posso ser útil?", "Olá! O que você precisa?"],
+            "oi": ["Olá! Como posso ajudar?", "Oi! Em que posso ser útil?"],
             "bom dia": ["Bom dia! Como posso ajudar?", "Bom dia! Em que posso ser útil hoje?"],
             "boa tarde": ["Boa tarde! Como posso ajudar?", "Boa tarde! Em que posso ser útil hoje?"],
             "boa noite": ["Boa noite! Como posso ajudar?", "Boa noite! Em que posso ser útil hoje?"],
-            "ajuda": ["Posso ajudar com:\n- Dúvidas gerais\n- Análise de textos\n- Sugestões e recomendações"],
-            "quem é você": ["Sou um assistente virtual criado para ajudar em diversas tarefas!"],
+            "ajuda": ["Posso ajudar com:\n- Cálculos matemáticos\n- Dúvidas gerais\n- Análise de textos"],
             "tchau": ["Até mais! Foi um prazer ajudar!", "Tchau! Volte sempre!"],
         }
         
@@ -28,18 +21,39 @@ class Chatbot:
         st.markdown("""
         ### Bem-vindo ao seu assistente!
         Posso ajudar com:
+        - Cálculos matemáticos
         - Dúvidas gerais
         - Análise de textos
-        - Sugestões e recomendações
         """)
         
     def initialize_state(self):
         if "messages" not in st.session_state:
             st.session_state.messages = []
     
+    def calculate_mil_vezes(self, numero):
+        try:
+            num = float(numero)
+            resultado = num * 1000
+            return f"O resultado de {num} × 1000 = {resultado:,.2f}"
+        except:
+            return "Desculpe, não consegui entender o número para calcular."
+    
+    def process_math_question(self, text):
+        # Procura por padrões de "quanto é X vezes mil"
+        mil_pattern = r"quanto.*?(\d+).*?mil"
+        if match := re.search(mil_pattern, text.lower()):
+            return self.calculate_mil_vezes(match.group(1))
+            
+        # Outros padrões matemáticos podem ser adicionados aqui
+        return None
+    
     def get_bot_response(self, user_input):
         # Simula processamento
         time.sleep(0.5)
+        
+        # Verifica se é uma questão matemática
+        if math_response := self.process_math_question(user_input):
+            return math_response
         
         # Converte input para minúsculas para comparação
         user_input_lower = user_input.lower()
